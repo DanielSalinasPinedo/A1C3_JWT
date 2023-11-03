@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ruta Protegida</title>
+  <!-- Agrega tus estilos CSS aquí -->
+</head>
+<body>
+    <h1 id="cookie-value"></h1>
+    <p id="parrafo"></p>
+    <button id="logout-button"></button>
+
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+    // Obtiene el valor de la cookie "miCookie" y lo muestra en el <h1>
+    const token = getCookie("token");
+    document.addEventListener("DOMContentLoaded", async function () {
+        const response = await fetch("/protected", {
+            method: "POST",
+            headers: {
+            "Authorization": `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 200) {
+            const data = await response.json();
+            document.getElementById("cookie-value").textContent = `Bienvenido ${data.message}`;
+            document.getElementById("parrafo").textContent = `Esta es una página protegida que solo los usuarios autenticados pueden ver.`;
+            document.getElementById("logout-button").textContent = "Cerrar Sesion";
+        } else {
+            document.getElementById("logout-button").style.display = "none";
+            Swal.fire({
+                title: 'Acceso no autorizado',
+                text: 'Credenciales inválidas',
+                icon: 'error',
+                confirmButtonText: 'Volver',
+                backdrop: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                stopKeydownPropagation: false,
+            }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/formulario';
+            }
+            });
+        }
+    });
+
+    // Agrega un evento para cerrar la sesión y eliminar la cookie del token
+    document.getElementById("logout-button").addEventListener("click", function () {
+      document.cookie = "token=; 0; path=/";
+      window.location.href = "/formulario"; // Redirige al usuario a la página de inicio de sesión
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
