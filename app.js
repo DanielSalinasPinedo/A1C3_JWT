@@ -23,18 +23,22 @@ const db = mysql.createConnection({
   });
 
 app.get("/", (req, res) => {
-  res.redirect("/formulario");
+  res.redirect("/login");
 });
 
-// Ruta para mostrar el formulario HTML
-app.get("/formulario", (req, res) => {
-  res.sendFile(__dirname + "/public/form.html");
+// Ruta para mostrar el login HTML
+app.get("/login", (req, res) => {
+  res.sendFile(__dirname + "/public/login.html");
 });
 
-// Ruta para mostrar el formulario HTML
+// Ruta para mostrar el login HTML
 app.get("/protected", (req, res) => {
   res.sendFile(__dirname + "/public/protected.html");
 });
+
+app.get("/register", (req, res) => {
+    res.sendFile(__dirname + "/public/register.html");
+  });
 
 // Ruta de inicio de sesión
 app.post("/login", (req, res) => {
@@ -61,6 +65,19 @@ app.post("/login", (req, res) => {
       res.sendStatus(401); // Credenciales inválidas
     }
   });
+});
+
+app.post("/register", (req, res) => {
+    const { username, password } = req.body;
+    const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+    db.query(query, [username, password], (err, results) => {
+        if (err) {
+            console.log(err.message)
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json({ message: 'Usuario registrado exitosamente' });
+    });
 });
 
 app.post('/protected',verifyToken, (req,res) =>{
